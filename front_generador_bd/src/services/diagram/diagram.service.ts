@@ -564,8 +564,24 @@ export class DiagramService {
         'stroke-width': 2,
         'data-open': 'true'
       }
+    },
+    // Clase de asociación: une el punto medio de una asociación con la clase que
+    // lleva los atributos de esa relación (la "tabla intermedia"). A diferencia
+    // de las otras cinco, su origen es un conector y no una clase.
+    // Se dibuja punteada y sin adornos en ninguno de los dos extremos.
+    associationClass: {
+      '.connection': { stroke: '#333', 'stroke-width': 2, 'stroke-dasharray': '5 4' },
+      '.marker-source': { d: 'M 0 0' },
+      '.marker-target': { d: 'M 0 0' }
     }
   };
+
+  /** Tipos de relación cuyo origen es un conector en lugar de una clase. */
+  static readonly LINK_ANCHORED_TYPES = ['associationClass'];
+
+  static isLinkAnchored(type: string): boolean {
+    return DiagramService.LINK_ANCHORED_TYPES.includes(type);
+  }
 
   /**
    * Crea una relación tipada entre dos elementos y la añade al grafo
@@ -586,18 +602,23 @@ export class DiagramService {
       attrs
     });
 
-    link.set('labels', [
-      {
-        position: { distance: 20, offset: -10 },
-        attrs: { text: { text: '0..1', fill: '#333', fontSize: 12 } },
-        markup: [{ tagName: 'text', selector: 'text' }]
-      },
-      {
-        position: { distance: -20, offset: -10 },
-        attrs: { text: { text: '1..*', fill: '#333', fontSize: 12 } },
-        markup: [{ tagName: 'text', selector: 'text' }]
-      }
-    ]);
+    // Una clase de asociación no tiene multiplicidades: describe los atributos de
+    // una relación, no la relación misma. Las cardinalidades ya están en el
+    // conector del que cuelga.
+    if (!DiagramService.isLinkAnchored(type)) {
+      link.set('labels', [
+        {
+          position: { distance: 20, offset: -10 },
+          attrs: { text: { text: '0..1', fill: '#333', fontSize: 12 } },
+          markup: [{ tagName: 'text', selector: 'text' }]
+        },
+        {
+          position: { distance: -20, offset: -10 },
+          attrs: { text: { text: '1..*', fill: '#333', fontSize: 12 } },
+          markup: [{ tagName: 'text', selector: 'text' }]
+        }
+      ]);
+    }
 
     if (!remote) {
       this.graph.addCell(link);       // 👈 disparará 'add' → broadcast
@@ -924,8 +945,22 @@ export class DiagramService {
       }
     });
 
-    // 2. Crear todas las relaciones
-    json.relationships.forEach((rel: any) => {
+    // 2. Crear todas las relaciones.
+    //
+    // En dos pasadas: una clase de asociación se ancla a un conector, así que ese
+    // conector tiene que existir antes. El orden de `json.relationships` no lo
+    // garantiza, porque al exportar sale del recorrido de celdas del grafo.
+    const plainRels = json.relationships.filter(
+      (rel: any) => !DiagramService.isLinkAnchored(rel.type)
+    );
+    const linkAnchoredRels = json.relationships.filter(
+      (rel: any) => DiagramService.isLinkAnchored(rel.type)
+    );
+
+    const restoreRelationship = (rel: any) => {
+      // Los ids de las clases se remapean; los de los conectores se conservan tal
+      // cual (`link.set('id', ...)` más abajo), así que una referencia a un
+      // conector cae en el `|| rel.sourceId` y resuelve igual.
       const srcId = idMap[rel.sourceId] || rel.sourceId;
       const trgId = idMap[rel.targetId] || rel.targetId;
 
@@ -939,11 +974,18 @@ export class DiagramService {
 
       if (existingLink) return;
 
+      // Si el extremo de origen es un conector que no llegó a crearse, no tiene
+      // sentido colgar nada de él: JointJS lanzaría al resolver la vista.
+      if (DiagramService.isLinkAnchored(rel.type) && !this.graph.getCell(srcId)) {
+        console.warn('[Diagram] Clase de asociación sin conector de origen, se omite:', rel.id);
+        return;
+      }
+
       const link = this.createTypedRelationship(srcId, trgId, rel.type, true);
       link.set('id', rel.id);
 
       // 🔹 aplicar labels si vienen
-      if (rel.labels) {
+      if (rel.labels && !DiagramService.isLinkAnchored(rel.type)) {
         link.set(
           'labels',
           rel.labels.map((txt: string, i: number) => ({
@@ -960,7 +1002,10 @@ export class DiagramService {
       }
 
       this.graph.addCell(link);
-    });
+    };
+
+    plainRels.forEach(restoreRelationship);
+    linkAnchoredRels.forEach(restoreRelationship);
   }
 
   /**

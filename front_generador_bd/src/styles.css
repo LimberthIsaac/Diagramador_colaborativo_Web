@@ -309,6 +309,35 @@ body,
   stroke-width: 1;
 }
 
+/* Aviso flotante mientras se crea una relación. Lo inyecta relationship.service
+   dentro del contenedor del lienzo, así que no lo alcanza el CSS encapsulado de
+   ningún componente y tiene que vivir acá, como el editor inline. */
+.rel-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%) translateY(6px);
+  z-index: 900;
+  max-width: min(520px, calc(100% - 32px));
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--fg-2);
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+  box-shadow: 0 8px 24px -12px rgb(0 0 0 / 0.45);
+  pointer-events: none;   /* no debe robar los clics del lienzo */
+  opacity: 0;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.rel-hint.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 /* Scrollbar discreta, coherente con el tema */
 .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
