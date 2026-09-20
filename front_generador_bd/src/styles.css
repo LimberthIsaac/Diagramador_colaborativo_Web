@@ -251,7 +251,12 @@ body,
   fill: var(--uml-text);
 }
 
-.joint-element .sep-name,
+/* El divisor del nombre cierra el encabezado: mismo color y peso que el borde.
+   El de atributos separa dos secciones del cuerpo y se mantiene discreto. */
+.joint-element .sep-name {
+  stroke: var(--uml-border);
+}
+
 .joint-element .sep-attrs {
   stroke: var(--uml-divider);
 }

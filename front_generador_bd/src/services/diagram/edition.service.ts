@@ -187,14 +187,18 @@ export class EditionService {
     const methsH = Math.max(this.MIN_METHS_H, Math.round((methsHText || 0) + this.PAD_V));
     const totalH = Math.round(nameH + attrsH + methsH);
 
-    model.attr('.uml-class-name-rect/height', nameH);
+    // Un píxel menos que la franja: el rectángulo arranca en y=1 para no tapar
+    // la mitad interior del trazo de `.uml-outer` (ver createUmlNamespace).
+    model.attr('.uml-class-name-rect/height', nameH - 1);
 
     const x1 = 1, x2 = width - 1;
-    const y1 = Math.round(nameH) + 0.5;
+    // El divisor del nombre tiene 2px, así que su centro va en un entero;
+    // el de atributos tiene 1px y necesita el medio píxel para verse nítido.
+    const ySepName = Math.round(nameH);
     const y2 = Math.round(nameH + attrsH) + 0.5;
 
     model.attr({
-      '.sep-name':  { x1, y1, x2, y2: y1 },
+      '.sep-name':  { x1, y1: ySepName, x2, y2: ySepName },
       '.sep-attrs': { x1, y1: y2, x2, y2 }
     });
 
