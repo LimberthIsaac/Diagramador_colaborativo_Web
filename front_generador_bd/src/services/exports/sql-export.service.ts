@@ -23,8 +23,14 @@ export class SqlExportService {
 
   exportToSql(umlJson: any, dbName: string = 'uml_database'): string {
     let sql = '';
-    sql += `CREATE DATABASE ${dbName};\n`;
-    sql += `USE ${dbName};\n\n`;
+    // Antes esto emitía `CREATE DATABASE` y `USE`, que son sintaxis MySQL,
+    // mientras los tipos de más abajo son de PostgreSQL: el script no corría en
+    // ningún motor sin editarlo. La base se crea aparte, así que acá solo va la
+    // instrucción de cómo ejecutarlo.
+    sql += `-- Esquema generado por el Diagramador UML\n`;
+    sql += `-- Motor: PostgreSQL. Ejecutar sobre una base ya creada:\n`;
+    sql += `--   createdb ${dbName}\n`;
+    sql += `--   psql -d ${dbName} -f este_archivo.sql\n\n`;
 
     // ====== CLASES DE ASOCIACIÓN ======
     // Una clase de asociación es la tabla intermedia de un muchos a muchos con
@@ -96,6 +102,20 @@ export class SqlExportService {
       const source = umlJson.classes.find((c: any) => c.id === rel.sourceId);
       const target = umlJson.classes.find((c: any) => c.id === rel.targetId);
       if (!source || !target) continue;
+
+      // Herencia: la tabla hija ya copia el nombre y el tipo de la clave primaria
+      // del padre en el recorrido de tablas, pero nada la ataba a él. Sin esta
+      // restricción la base acepta una fila hija sin su fila padre, que es
+      // exactamente lo que la herencia no debería permitir.
+      // `source` es la hija y `target` el padre, igual que en el recorrido de tablas.
+      if (rel.type === 'generalization') {
+        const childPk = this.getPrimaryKeyInfo(source, umlJson);
+        const parentPk = this.getPrimaryKeyInfo(target, umlJson);
+        const fkName = `fk_${source.name.toLowerCase()}_${target.name.toLowerCase()}`;
+        sql += `ALTER TABLE ${source.name}\n`;
+        sql += `  ADD CONSTRAINT ${fkName} FOREIGN KEY (${childPk.name}) REFERENCES ${target.name}(${parentPk.name}) ON DELETE CASCADE ON UPDATE CASCADE;\n\n`;
+        continue;
+      }
 
       // Multiplicidad
       const multSource = rel.labels?.[0] || '1';
