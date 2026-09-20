@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, HostListener, Inject, NgZone, PLATFORM_ID, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, Inject, NgZone, PLATFORM_ID, ViewChild, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { CdkDragEnd, CdkDropListGroup, CdkDropList } from '@angular/cdk/drag-drop';
 import { SidePanel } from "../side-panel/side-panel";
@@ -11,17 +11,33 @@ import { BackendGeneratorService } from '../../services/exports/backend-generato
 import { ChatbotService } from '../../services/IA/chatbot.service';
 import { UmlValidationService } from '../../services/colaboration/uml-validation.service';
 import { ActivatedRoute } from '@angular/router';
+import { TopBar } from '../top-bar/top-bar';
+import { JoinName } from '../join-name/join-name';
+import { IdentityService } from '../../services/session/identity.service';
 
 @Component({
   selector: 'app-diagram',
   standalone: true,
   templateUrl: './diagram.html',
   styleUrls: ['./diagram.css'],
-  imports: [SidePanel, CdkDropListGroup, CdkDropList]
+  imports: [SidePanel, CdkDropListGroup, CdkDropList, TopBar, JoinName]
 })
 export class Diagram implements AfterViewInit {
   @ViewChild('paperContainer', { static: true }) paperContainer!: ElementRef;
   @ViewChild(SidePanel) sidePanel!: SidePanel;
+
+  /** Se muestra en la barra superior y da el enlace que se comparte. */
+  roomId = '';
+
+  private identity = inject(IdentityService);
+
+  /** Quien llega por enlace compartido se saltea el landing y no tiene
+   *  nombre. En ese caso se le pide acá antes de dejarlo entrar. */
+  readonly needsName = signal(false);
+
+  onNameConfirmed(): void {
+    this.needsName.set(false);
+  }
 
   private lastMousePos: { x: number; y: number } | null = null;
   
@@ -39,10 +55,15 @@ export class Diagram implements AfterViewInit {
   ) {}
   
   async ngAfterViewInit(): Promise<void> {
+    this.roomId = this.route.snapshot.paramMap.get('roomId') || 'default-room';
+
     if (isPlatformBrowser(this.platformId)) {
+      this.identity.restore();
+      this.needsName.set(!this.identity.hasName());
+
       this.ngZone.run(async () => {
         try {
-          const roomId = this.route.snapshot.paramMap.get('roomId') || 'default-room';
+          const roomId = this.roomId;
           await this.diagramService.initialize(this.paperContainer.nativeElement, roomId);
           
           this.sidePanel.elementDragged.subscribe((event: CdkDragEnd) => {

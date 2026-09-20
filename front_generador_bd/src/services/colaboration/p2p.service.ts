@@ -1,5 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { SignalingService } from './signaling.service';
+import { PresenceService } from './presence.service';
+import { IdentityService } from '../session/identity.service';
 
 type Peer = {
   pc: RTCPeerConnection;
@@ -11,6 +13,9 @@ export class P2PService {
   private peers = new Map<string, Peer>();
   private localId = ''; // mi channel_name (lo asigna el servidor en presence)
   public onData?: (from: string, data: any) => void;
+
+  private presence = inject(PresenceService);
+  private identity = inject(IdentityService);
 
   constructor(private signaling: SignalingService) {}
 
@@ -83,7 +88,12 @@ export class P2PService {
         this.localId = msg.peer;
       }
       if (msg.action === 'join') {
-        this.signaling.broadcast({ type: 'announce' });
+        // La identidad viaja de polizón en el announce: el consumer de Django
+        // relaya el payload tal cual, así que no hace falta tocar el backend.
+        this.signaling.broadcast({ type: 'announce', ...this.identity.toAnnouncePayload() });
+      }
+      if (msg.action === 'leave' && msg.peer) {
+        this.dropPeer(msg.peer);
       }
       return;
     }
@@ -91,6 +101,13 @@ export class P2PService {
     if (msg.type === 'broadcast') {
       if (msg.payload?.type === 'announce') {
         const remoteId = msg.from;
+
+        // El registro se actualiza siempre, incluso si el peer ya existe:
+        // un re-announce puede traer un nombre nuevo.
+        if (remoteId !== this.localId) {
+          this.presence.upsert(remoteId, msg.payload.name, msg.payload.color);
+        }
+
         if (this.peers.has(remoteId)) return;
 
         const isInitiator = this.localId < remoteId;
@@ -129,9 +146,21 @@ export class P2PService {
     }
   }
 
+  /** Saca a un peer del registro y libera su conexión.
+   *  Antes el `leave` se ignoraba y las RTCPeerConnection quedaban colgadas. */
+  private dropPeer(remoteId: string) {
+    const peer = this.peers.get(remoteId);
+    if (peer) {
+      try { peer.dc?.close(); } catch {}
+      try { peer.pc.close(); } catch {}
+      this.peers.delete(remoteId);
+    }
+    this.presence.remove(remoteId);
+  }
+
   sendToAll(data: any) {
     const json = JSON.stringify(data);
-    for (const [id, p] of this.peers) {
+    for (const [, p] of this.peers) {
       if (p.dc?.readyState === 'open') {
         p.dc.send(json);
       }
@@ -143,7 +172,7 @@ export class P2PService {
 
   closeSocketRTC() {
     // Cerrar WebRTC peers
-    for (const [id, peer] of this.peers) {
+    for (const [, peer] of this.peers) {
       try {
         peer.dc?.close();
       } catch {}
@@ -153,6 +182,7 @@ export class P2PService {
     }
     this.peers.clear();
     this.localId = '';
+    this.presence.reset();
 
     // Cerrar signaling
     this.signaling.close();

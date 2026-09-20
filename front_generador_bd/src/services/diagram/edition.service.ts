@@ -44,17 +44,13 @@ export class EditionService {
       : document.createElement('textarea');
 
     editor.value = currentValue;
+    // La apariencia vive en styles.css (.uml-inline-editor) para que siga al
+    // tema. Acá sólo va lo que depende de la posición del elemento editado.
+    editor.className = 'uml-inline-editor';
     Object.assign(editor.style, {
-      position: 'absolute',
       left: `${absX}px`,
       top: `${absY}px`,
-      border: '1px solid #2196f3',
-      padding: '2px',
-      zIndex: '1000',
-      fontSize: '14px',
-      background: '#fff',
-      minWidth: `${Math.max(120, bbox.width - 20)}px`,
-      resize: field === 'name' ? 'none' : 'none'
+      minWidth: `${Math.max(120, bbox.width - 20)}px`
     } as CSSStyleDeclaration);
 
     if (field !== 'name') (editor as HTMLTextAreaElement).rows = 4;
@@ -109,33 +105,22 @@ export class EditionService {
     const input = document.createElement('input');
     input.type = 'text';
     input.value = currentValue;
+    input.className = 'uml-inline-editor uml-inline-editor--label';
     Object.assign(input.style, {
-      position: 'absolute',
       left: `${absX}px`,
-      top: `${absY}px`,
-      border: '1px solid #2196f3',
-      padding: '2px',
-      zIndex: '1000',
-      fontSize: '12px',
-      background: '#fff',
-      minWidth: '60px'
+      top: `${absY}px`
     } as CSSStyleDeclaration);
 
     document.body.appendChild(input);
     input.focus();
 
     const labelNode = (paper.findViewByModel(model) as any).findLabelNode(labelIndex) as SVGElement;
-    if (labelNode) {
-      labelNode.setAttribute('stroke', '#2196f3');
-      labelNode.setAttribute('stroke-width', '1');
-    }
+    // Resaltado por clase en vez de atributo, para que el color lo ponga el tema.
+    labelNode?.classList.add('uml-label-editing');
 
     let closed = false;
     const cleanupHighlight = () => {
-      if (labelNode) {
-        labelNode.removeAttribute('stroke');
-        labelNode.removeAttribute('stroke-width');
-      }
+      labelNode?.classList.remove('uml-label-editing');
     };
     const finish = (save: boolean) => {
       if (closed) return;
@@ -149,7 +134,6 @@ export class EditionService {
         const umlJson = this.exportService.export(graph);
         this.umlValidationService.validateModel(umlJson);
       }
-      if (labelNode) { labelNode.removeAttribute('stroke'); labelNode.removeAttribute('stroke-width'); }
       input.parentNode && input.parentNode.removeChild(input);
       cleanupHighlight();
     };

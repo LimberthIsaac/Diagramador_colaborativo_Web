@@ -1,5 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { ThemeService } from '../services/theme/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -7,6 +8,11 @@ import { RouterOutlet } from '@angular/router';
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
-  protected readonly title = signal('front_generador_bd');
+export class App implements OnInit {
+  protected readonly title = signal('Lienzo Colaborativo');
+  private theme = inject(ThemeService);
+
+  ngOnInit(): void {
+    this.theme.init();
+  }
 }

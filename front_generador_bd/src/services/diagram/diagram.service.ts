@@ -521,7 +521,10 @@ export class DiagramService {
       '.marker-target': {
         d: 'M 20 0 L 0 10 L 20 20 z',
         fill: '#fff',
-        stroke: '#333'
+        stroke: '#333',
+        // Marca la punta como hueca para que el tema la rellene con el
+        // color del lienzo en lugar del color de la línea.
+        'data-hollow': 'true'
       }
     },
     aggregation: {
@@ -529,7 +532,8 @@ export class DiagramService {
       '.marker-source': {
         d: 'M 0 10 L 10 0 L 20 10 L 10 20 z',
         fill: '#fff',
-        stroke: '#333'
+        stroke: '#333',
+        'data-hollow': 'true'
       }
     },
     composition: {
