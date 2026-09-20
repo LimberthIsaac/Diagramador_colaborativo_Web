@@ -217,6 +217,16 @@ body,
   stroke: var(--link);
 }
 
+/* Punta abierta (dependencia): dos líneas sin cerrar. Necesita su propia
+   regla porque la de arriba rellena todas las puntas, y el CSS le gana al
+   atributo `fill="none"` que pone JointJS. */
+.joint-link [data-open="true"] {
+  fill: none;
+  stroke: var(--link);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
 .joint-link .label text,
 .joint-link .label tspan {
   fill: var(--fg-2);

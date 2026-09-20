@@ -22,8 +22,8 @@ export class ThemeService {
     return isPlatformBrowser(this.platformId);
   }
 
-  /** Oscuro por defecto: es el aspecto que la app tuvo siempre. */
-  private readonly _theme = signal<Theme>('dark');
+  /** Claro por defecto; el oscuro se elige con el botón de la barra. */
+  private readonly _theme = signal<Theme>('light');
 
   readonly theme = this._theme.asReadonly();
   readonly isDark = computed(() => this._theme() === 'dark');

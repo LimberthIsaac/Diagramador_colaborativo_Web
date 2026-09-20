@@ -546,8 +546,14 @@ export class DiagramService {
     dependency: {
       '.connection': { stroke: '#333', 'stroke-width': 2, 'stroke-dasharray': '4 2' },
       '.marker-target': {
-        d: 'M 10 0 L 0 5 L 10 10 z',
-        fill: '#333'
+        // Punta abierta: el trazo no cierra (sin `z`) ni se rellena, que es
+        // como UML dibuja la dependencia. Antes usaba el mismo triángulo
+        // relleno que la asociación.
+        d: 'M 10 0 L 0 5 L 10 10',
+        fill: 'none',
+        stroke: '#333',
+        'stroke-width': 2,
+        'data-open': 'true'
       }
     }
   };

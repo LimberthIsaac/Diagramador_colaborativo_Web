@@ -3,7 +3,11 @@
 
 .landing {
   background: var(--landing-bg);
-  gap: 34px;
+  /* El ritmo vertical cede en pantallas bajas para que todo entre sin
+     scroll. Al agregar el campo de nombre, con separaciones fijas la
+     página dejaba de entrar en un portátil. */
+  gap: clamp(16px, 3.2vh, 34px);
+  padding-block: clamp(20px, 4.5vh, 48px);
 }
 
 /* ---------- Orbes de ambiente ---------- */
@@ -65,11 +69,22 @@
 /* ---------- Título ---------- */
 
 .landing-title {
+  /* Toma la menor entre la medida por ancho y la medida por alto, para que
+     en una pantalla baja el título ceda en vez de empujar el pie fuera. */
+  font-size: clamp(30px, min(6.2vw, 7.6vh), 60px);
+  line-height: 1.05;
+  margin: 0 0 clamp(8px, 1.6vh, 16px);
   background: linear-gradient(90deg, var(--head-1), var(--head-2));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   text-wrap: balance;
+}
+
+.landing-sub {
+  font-size: clamp(14px, min(1.5vw, 2.4vh), 20px);
+  line-height: 1.45;
+  margin: 0;
 }
 
 /* ---------- Identidad ---------- */
@@ -161,7 +176,7 @@
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--card-border);
   border-radius: 24px;
-  padding: 32px;
+  padding: clamp(20px, 3.4vh, 32px);
   box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 18px 40px -24px rgb(15 23 42 / 0.22);
   transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1),
               box-shadow 500ms ease,
@@ -174,11 +189,15 @@
   box-shadow: 0 28px 55px -22px var(--card-hover-glow), 0 0 0 1px var(--card-hover-border);
 }
 
+.card-head {
+  margin-bottom: clamp(16px, 3vh, 32px);
+}
+
 .card-badge {
-  width: 80px;
-  height: 80px;
+  width: clamp(56px, 8vh, 80px);
+  height: clamp(56px, 8vh, 80px);
   border-radius: 50%;
-  margin: 0 auto 24px;
+  margin: 0 auto clamp(12px, 2.4vh, 24px);
   display: grid;
   place-items: center;
   background: linear-gradient(135deg, var(--badge-from), var(--badge-to));
