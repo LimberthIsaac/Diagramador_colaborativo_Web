@@ -493,7 +493,8 @@ export class DiagramService {
       target: targetId ? { id: targetId } : undefined,
       attrs: {
         '.connection': { stroke: '#333333', 'stroke-width': 2 },
-        '.marker-target': { fill: '#333333', d: 'M 10 0 L 0 5 L 10 10 z' }
+        // Nace como asociación, así que va sin punta (ver relationAttrs).
+        '.marker-target': { d: 'M 0 0' }
       },
       labels: [
         {
@@ -514,14 +515,25 @@ export class DiagramService {
   private readonly relationAttrs: any = {
     association: {
       '.connection': { stroke: '#333', 'stroke-width': 2 },
-      '.marker-target': { fill: '#333', d: 'M 10 0 L 0 5 L 10 10 z' }
+      // Sin punta: en UML la asociación binaria simple es solo la línea. La
+      // punta abierta indica navegabilidad, y como acá todas las asociaciones
+      // llevarían la misma no marcaría nada. El triángulo relleno que había
+      // antes pertenece al adorno de dirección del nombre, que va en el medio.
+      //
+      // El trazo vacío se declara, no se omite: `attr()` fusiona los atributos
+      // (ver applyRelationshipChanges), así que sin esto la punta de la
+      // herencia o la dependencia sobreviviría al cambio de tipo.
+      '.marker-target': { d: 'M 0 0' }
     },
     generalization: {
       '.connection': { stroke: '#333', 'stroke-width': 2 },
       '.marker-target': {
         d: 'M 20 0 L 0 10 L 20 20 z',
         fill: '#fff',
-        stroke: '#333'
+        stroke: '#333',
+        // Marca la punta como hueca para que el tema la rellene con el
+        // color del lienzo en lugar del color de la línea.
+        'data-hollow': 'true'
       }
     },
     aggregation: {
@@ -529,7 +541,8 @@ export class DiagramService {
       '.marker-source': {
         d: 'M 0 10 L 10 0 L 20 10 L 10 20 z',
         fill: '#fff',
-        stroke: '#333'
+        stroke: '#333',
+        'data-hollow': 'true'
       }
     },
     composition: {
@@ -542,8 +555,14 @@ export class DiagramService {
     dependency: {
       '.connection': { stroke: '#333', 'stroke-width': 2, 'stroke-dasharray': '4 2' },
       '.marker-target': {
-        d: 'M 10 0 L 0 5 L 10 10 z',
-        fill: '#333'
+        // Punta abierta: el trazo no cierra (sin `z`) ni se rellena, que es
+        // como UML dibuja la dependencia. Antes usaba el mismo triángulo
+        // relleno que la asociación.
+        d: 'M 10 0 L 0 5 L 10 10',
+        fill: 'none',
+        stroke: '#333',
+        'stroke-width': 2,
+        'data-open': 'true'
       }
     }
   };
@@ -749,8 +768,14 @@ export class DiagramService {
           width: 180, // Fijo para evitar cambios inesperados
           height: 110, // Fijo para evitar cambios inesperados
         },
-        '.uml-class-name-rect': { refWidth: '100%', height: 30, fill: '#e3f2fd' },
-        '.sep-name': { stroke: '#2196f3', strokeWidth: 1, shapeRendering: 'crispEdges' },
+        // Desplazado 1px hacia adentro y 2px más angosto: el trazo de
+        // `.uml-outer` se monta sobre el borde (1px adentro, 1px afuera) y este
+        // rectángulo se dibuja encima. Sin el margen le tapaba la mitad interior
+        // y el borde del encabezado se veía la mitad de grueso que el del cuerpo.
+        '.uml-class-name-rect': { x: 1, y: 1, refWidth: -2, height: 29, fill: '#e3f2fd' },
+        // El divisor del nombre cierra el encabezado, así que lleva el grosor
+        // del borde; el de atributos separa dos secciones del cuerpo y queda fino.
+        '.sep-name': { stroke: '#2196f3', strokeWidth: 2, shapeRendering: 'crispEdges' },
         '.sep-attrs': { stroke: '#2196f3', strokeWidth: 1, shapeRendering: 'crispEdges' },
         '.uml-class-name-text': {
           ref: '.uml-class-name-rect',
@@ -833,7 +858,9 @@ export class DiagramService {
       target: targetId ? { id: targetId } : undefined,
       attrs: {
         '.connection': { stroke: '#333333', 'stroke-width': 2 },
-        '.marker-target': { fill: '#333333', d: 'M 10 0 L 0 5 L 10 10 z' },
+        // Misma forma que la local: el conector que llega de otro participante
+        // no puede verse distinto del que dibujamos acá.
+        '.marker-target': { d: 'M 0 0' },
       },
       labels: [
         {

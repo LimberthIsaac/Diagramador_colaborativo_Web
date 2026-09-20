@@ -1,375 +1,374 @@
-<div class="flex flex-col w-72 h-full bg-gray-950/95 backdrop-blur-xl border-r border-gray-800 shadow-2xl p-4 space-y-6 overflow-y-scroll text-gray-200 font-sans custom-scrollbar">
+<div class="side-panel custom-scrollbar">
 
   <!-- Header -->
-  <div class="flex justify-between items-center mb-2 pb-4 border-b border-gray-800">
-    <h2 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600 tracking-tight">Herramientas UML</h2>
-    <button class="text-sm text-red-400 hover:text-red-300 font-medium transition flex items-center gap-1" (click)="goHome()">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+  <div class="sp-header">
+    <h2 class="sp-title">Herramientas UML</h2>
+    <button class="sp-exit" (click)="goHome()">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+        stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+      </svg>
       Salir
     </button>
   </div>
 
   <!-- Paleta de elementos -->
-  <button (click)="showPalette=!showPalette"
-    class="w-full bg-white/5 border border-white/10 text-white rounded-xl py-3 font-semibold flex items-center justify-between px-4 shadow-md transition hover:bg-white/10 hover:border-orange-500/30 cursor-pointer group">
+  <button (click)="showPalette=!showPalette" class="sp-section-btn group">
     <span>Paleta de elementos</span>
-    <span class="text-orange-400 group-hover:scale-110 transition-transform">
+    <span class="sp-chev">
       @if (showPalette) {
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-      </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+          class="size-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+        </svg>
       } @else {
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-      </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+          class="size-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+        </svg>
       }
     </span>
   </button>
-  
-  @if(showPalette){
-  <div class="space-y-3 animate-fade-in-down">
-    <div
-      class="palette-item cursor-pointer bg-black/40 border border-gray-800 rounded-xl shadow-sm px-4 py-3 hover:bg-orange-500/10 hover:border-orange-500/50 transition-all flex items-center gap-2"
-      cdkDrag [cdkDragData]="{ type: 'class' }" (cdkDragEnded)="onDragEnded($event)">
-      <span class="text-xl">📦</span> <span class="font-medium text-gray-200">Clase UML</span>
-    </div>
 
-    <div
-      class="palette-item cursor-pointer bg-black/40 border border-gray-800 rounded-xl shadow-sm px-4 py-3 hover:bg-orange-500/10 hover:border-orange-500/50 transition-all flex items-center gap-2"
-      cdkDrag [cdkDragData]="{ type: 'association' }" (cdkDragEnded)="onDragEnded($event)">
-      <div class="flex items-center w-full">
-        <span class="inline-block align-middle mr-3" style="width:70px;height:28px;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="25 -5 165 20">
-            <g>
-              <path d="M 7 7 L 158.88 7" fill="none" stroke="#f97316" stroke-width="3" stroke-miterlimit="10" pointer-events="stroke" />
-              <path d="M 165.88 7 L 158.88 11.5 L 158.88 2.5 Z" fill="#f97316" stroke="#f97316" stroke-width="3" stroke-miterlimit="10" pointer-events="all" />
-            </g>
+  @if (showPalette) {
+    <div class="space-y-3 animate-fade-in-down">
+
+      <div class="palette-item" cdkDrag [cdkDragData]="{ type: 'class' }" (cdkDragEnded)="onDragEnded($event)">
+        <span class="rel-icon">
+          <svg width="24" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linejoin="round">
+            <path d="M12 3 3 7.5l9 4.5 9-4.5L12 3Z" fill="currentColor" fill-opacity=".2" />
+            <path d="m3 12 9 4.5 9-4.5" />
+            <path d="m3 16.5 9 4.5 9-4.5" />
           </svg>
         </span>
-        <span class="font-medium text-gray-200">Asociación</span>
+        <span class="palette-label">Clase UML</span>
       </div>
-    </div>
 
-    <div
-      class="palette-item cursor-pointer bg-black/40 border border-gray-800 rounded-xl shadow-sm px-4 py-3 hover:bg-orange-500/10 hover:border-orange-500/50 transition-all flex items-center gap-2"
-      cdkDrag [cdkDragData]="{ type: 'generalization' }" (cdkDragEnded)="onDragEnded($event)">
-      <div class="flex items-center w-full">
-        <span class="inline-block align-middle mr-3" style="width:70px;height:28px;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="25 5 165 20">
-            <g>
-              <path d="M 24 18 L 145 18" fill="none" stroke="#f97316" stroke-width="3" stroke-miterlimit="10" pointer-events="stroke" />
-              <path d="M 165 18 L 145 28 L 145 8 Z" fill="none" stroke="#f97316" stroke-width="3" stroke-miterlimit="10" pointer-events="all" />
-            </g>
+      <div class="palette-item" cdkDrag [cdkDragData]="{ type: 'association' }" (cdkDragEnded)="onDragEnded($event)">
+        <span class="rel-icon">
+          <svg width="46" height="16" viewBox="0 0 46 16" fill="none">
+            <path d="M2 8 L44 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" />
           </svg>
         </span>
-        <span class="font-medium text-gray-200">Herencia</span>
+        <span class="palette-label">Asociación</span>
       </div>
-    </div>
 
-    <div
-      class="palette-item cursor-pointer bg-black/40 border border-gray-800 rounded-xl shadow-sm px-4 py-3 hover:bg-orange-500/10 hover:border-orange-500/50 transition-all flex items-center gap-2"
-      cdkDrag [cdkDragData]="{ type: 'aggregation' }" (cdkDragEnded)="onDragEnded($event)">
-      <div class="flex items-center w-full">
-        <span class="inline-block align-middle mr-3" style="width:70px;height:28px;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="25 5 165 20">
-            <g>
-              <path d="M 32 18 L 140 18" fill="none" stroke="#f97316" stroke-width="3" stroke-miterlimit="10" pointer-events="stroke" />
-              <polygon points="160,18 150,28 140,18 150,8" fill="none" stroke="#f97316" stroke-width="3" />
-            </g>
+      <div class="palette-item" cdkDrag [cdkDragData]="{ type: 'generalization' }" (cdkDragEnded)="onDragEnded($event)">
+        <span class="rel-icon">
+          <svg width="46" height="16" viewBox="0 0 46 16" fill="none">
+            <path d="M2 8 L31 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" />
+            <path d="M44 8 L31 14 L31 2 Z" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linejoin="round" />
           </svg>
         </span>
-        <span class="font-medium text-gray-200">Agregación</span>
+        <span class="palette-label">Herencia</span>
       </div>
-    </div>
 
-    <div
-      class="palette-item cursor-pointer bg-black/40 border border-gray-800 rounded-xl shadow-sm px-4 py-3 hover:bg-orange-500/10 hover:border-orange-500/50 transition-all flex items-center gap-2"
-      cdkDrag [cdkDragData]="{ type: 'composition' }" (cdkDragEnded)="onDragEnded($event)">
-      <div class="flex items-center w-full">
-        <span class="inline-block align-middle mr-3" style="width:70px;height:20px;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="20 5 165 20">
-            <g>
-              <path d="M 32 18 L 140 18" fill="none" stroke="#f97316" stroke-width="3" stroke-miterlimit="10" pointer-events="stroke" />
-              <polygon points="160,18 150,28 140,18 150,8" fill="#f97316" stroke="#f97316" stroke-width="3" />
-            </g>
+      <div class="palette-item" cdkDrag [cdkDragData]="{ type: 'aggregation' }" (cdkDragEnded)="onDragEnded($event)">
+        <span class="rel-icon">
+          <svg width="46" height="16" viewBox="0 0 46 16" fill="none">
+            <path d="M18 8 L44 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" />
+            <path d="M2 8 L10 2 L18 8 L10 14 Z" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linejoin="round" />
           </svg>
         </span>
-        <span class="font-medium text-gray-200">Composición</span>
+        <span class="palette-label">Agregación</span>
       </div>
-    </div>
 
-    <div
-      class="palette-item cursor-pointer bg-black/40 border border-gray-800 rounded-xl shadow-sm px-4 py-3 hover:bg-orange-500/10 hover:border-orange-500/50 transition-all flex items-center gap-2"
-      cdkDrag [cdkDragData]="{ type: 'dependency' }" (cdkDragEnded)="onDragEnded($event)">
-      <div class="flex items-center w-full">
-        <span class="inline-block align-middle mr-3" style="width:70px;height:28px;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="20 5 165 20">
-            <g>
-              <path d="M 32 18 L 145 18" fill="none" stroke="#9ca3af" stroke-width="3" stroke-miterlimit="10" stroke-dasharray="6 4" pointer-events="stroke" />
-              <path d="M 165 18 L 145 28 L 145 8 Z" fill="none" stroke="#9ca3af" stroke-width="3" stroke-miterlimit="10" pointer-events="all" />
-            </g>
+      <div class="palette-item" cdkDrag [cdkDragData]="{ type: 'composition' }" (cdkDragEnded)="onDragEnded($event)">
+        <span class="rel-icon">
+          <svg width="46" height="16" viewBox="0 0 46 16" fill="none">
+            <path d="M18 8 L44 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" />
+            <path d="M2 8 L10 2 L18 8 L10 14 Z" fill="currentColor" stroke="currentColor" stroke-width="2"
+              stroke-linejoin="round" />
           </svg>
         </span>
-        <span class="font-medium text-gray-200">Dependencia</span>
+        <span class="palette-label">Composición</span>
+      </div>
+
+      <div class="palette-item" cdkDrag [cdkDragData]="{ type: 'dependency' }" (cdkDragEnded)="onDragEnded($event)">
+        <span class="rel-icon">
+          <svg width="46" height="16" viewBox="0 0 46 16" fill="none">
+            <path d="M2 8 L34 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
+              stroke-dasharray="5 4" />
+            <path d="M34 2.5 L43.5 8 L34 13.5" fill="none" stroke="currentColor" stroke-width="2.2"
+              stroke-linejoin="round" stroke-linecap="round" />
+          </svg>
+        </span>
+        <span class="palette-label">Dependencia</span>
       </div>
     </div>
-  </div>
   }
 
   <div class="w-full space-y-4">
-    
+
     <!-- Importaciones -->
     <div>
-      <button
-        class="w-full bg-white/5 border border-white/10 text-white rounded-xl py-3 font-semibold flex items-center justify-between px-4 shadow-md transition hover:bg-white/10 hover:border-orange-500/30 cursor-pointer group mb-3"
-        (click)="showActionsImports = !showActionsImports">
+      <button class="sp-section-btn group mb-3" (click)="showActionsImports = !showActionsImports">
         <span>Importaciones</span>
-        <span class="text-orange-400 group-hover:scale-110 transition-transform">
+        <span class="sp-chev">
           @if (showActionsImports) {
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-          </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+              stroke="currentColor" class="size-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+            </svg>
           } @else {
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-          </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+              stroke="currentColor" class="size-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
           }
         </span>
       </button>
-      
-      @if(showActionsImports){
-      <div class="flex flex-col gap-2 animate-fade-in-down mb-4">
-        <!-- Botón visual -->
-        <label for="imagenImport"
-          class="cursor-pointer w-full bg-gradient-to-r from-gray-800 to-gray-900 border border-gray-700 hover:border-orange-500/50 hover:from-gray-800 hover:to-orange-900/40 text-gray-200 rounded-xl py-3 text-sm font-semibold shadow-lg transition-all flex items-center px-4 gap-3">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-            <path d="M16 3v5H8V3" />
-            <rect x="8" y="15" width="8" height="4" rx="1" />
-          </svg>
-          <span>Importar Imagen</span>
-        </label>
-        <input type="file" id="imagenImport" accept="image/*" class="hidden" (change)="onImportImage($event)" />
-      </div>
+
+      @if (showActionsImports) {
+        <div class="flex flex-col gap-2 animate-fade-in-down mb-4">
+          <label for="imagenImport" class="sp-action">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <path d="M16 3v5H8V3" />
+              <rect x="8" y="15" width="8" height="4" rx="1" />
+            </svg>
+            <span>Importar Imagen</span>
+          </label>
+          <input type="file" id="imagenImport" accept="image/*" class="hidden" (change)="onImportImage($event)" />
+        </div>
       }
     </div>
 
     <!-- Exportaciones -->
     <div>
-      <button
-        class="w-full bg-white/5 border border-white/10 text-white rounded-xl py-3 font-semibold flex items-center justify-between px-4 shadow-md transition hover:bg-white/10 hover:border-orange-500/30 cursor-pointer group mb-3"
-        (click)="showActions = !showActions">
+      <button class="sp-section-btn group mb-3" (click)="showActions = !showActions">
         <span>Exportaciones</span>
-        <span class="text-orange-400 group-hover:scale-110 transition-transform">
+        <span class="sp-chev">
           @if (showActions) {
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-          </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+              stroke="currentColor" class="size-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+            </svg>
           } @else {
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-          </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+              stroke="currentColor" class="size-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
           }
         </span>
       </button>
-      
+
       @if (showActions) {
-      <div class="flex flex-col gap-2 animate-fade-in-down mb-4">
-        <button class="w-full bg-gradient-to-r from-gray-800 to-gray-900 border border-gray-700 hover:border-orange-500/50 hover:from-gray-800 hover:to-orange-900/40 text-gray-200 rounded-xl py-3 text-sm font-semibold shadow-lg transition-all flex items-center px-4 gap-3" (click)="onSaveClicked()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-            <path d="M16 3v5H8V3" />
-            <rect x="8" y="15" width="8" height="4" rx="1" />
-          </svg>
-          <span>A BD / Proyecto</span>
-        </button>
-        <button class="w-full bg-gradient-to-r from-gray-800 to-gray-900 border border-gray-700 hover:border-orange-500/50 hover:from-gray-800 hover:to-orange-900/40 text-gray-200 rounded-xl py-3 text-sm font-semibold shadow-lg transition-all flex items-center px-4 gap-3" (click)="exportImage()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="5" width="18" height="14" rx="2" />
-            <circle cx="8" cy="10" r="2" />
-            <path d="M21 19l-5-7-4 5-3-4-4 6" />
-          </svg>
-          <span>Como Imagen (.png)</span>
-        </button>
-        <button class="w-full bg-gradient-to-r from-gray-800 to-gray-900 border border-gray-700 hover:border-orange-500/50 hover:from-gray-800 hover:to-orange-900/40 text-gray-200 rounded-xl py-3 text-sm font-semibold shadow-lg transition-all flex items-center px-4 gap-3" (click)="exportSql()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <ellipse cx="12" cy="7" rx="8" ry="3" />
-            <path d="M4 7v10c0 1.66 3.58 3 8 3s8-1.34 8-3V7" />
-            <path d="M4 17c0 1.66 3.58 3 8 3s8-1.34 8-3" />
-          </svg>
-          <span>Código SQL</span>
-        </button>
-        <button class="w-full bg-gradient-to-r from-gray-800 to-gray-900 border border-gray-700 hover:border-orange-500/50 hover:from-gray-800 hover:to-orange-900/40 text-gray-200 rounded-xl py-3 text-sm font-semibold shadow-lg transition-all flex items-center px-4 gap-3" (click)="onGenerateFrontend()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-            <path d="M16 3v5H8V3" />
-            <rect x="8" y="15" width="8" height="4" rx="1" />
-          </svg>
-          <span>Flutter UI</span>
-        </button>
-        <button class="w-full bg-gradient-to-r from-gray-800 to-gray-900 border border-gray-700 hover:border-orange-500/50 hover:from-gray-800 hover:to-orange-900/40 text-gray-200 rounded-xl py-3 text-sm font-semibold shadow-lg transition-all flex items-center px-4 gap-3" (click)="exportJson()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="12" y1="18" x2="12" y2="12"></line>
-            <line x1="9" y1="15" x2="15" y2="15"></line>
-          </svg>
-          <span>Postman JSON</span>
-        </button>
-        <button class="w-full bg-gradient-to-r from-gray-800 to-gray-900 border border-gray-700 hover:border-orange-500/50 hover:from-gray-800 hover:to-orange-900/40 text-gray-200 rounded-xl py-3 text-sm font-semibold shadow-lg transition-all flex items-center px-4 gap-3" (click)="exportSwagger()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="2" y1="12" x2="22" y2="12"></line>
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-          </svg>
-          <span>Swagger YAML</span>
-        </button>
-        <button class="w-full bg-gradient-to-r from-gray-800 to-gray-900 border border-gray-700 hover:border-orange-500/50 hover:from-gray-800 hover:to-orange-900/40 text-gray-200 rounded-xl py-3 text-sm font-semibold shadow-lg transition-all flex items-center px-4 gap-3" (click)="exportEnterpriseArchitect()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="16 18 22 12 16 6"></polyline>
-            <polyline points="8 6 2 12 8 18"></polyline>
-          </svg>
-          <span>A Enterprise Architect (XML)</span>
-        </button>
-      </div>
+        <div class="flex flex-col gap-2 animate-fade-in-down mb-4">
+
+          <button class="sp-action" (click)="onSaveClicked()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <path d="M16 3v5H8V3" />
+              <rect x="8" y="15" width="8" height="4" rx="1" />
+            </svg>
+            <span>A BD / Proyecto</span>
+          </button>
+
+          <button class="sp-action" (click)="exportImage()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="5" width="18" height="14" rx="2" />
+              <circle cx="8" cy="10" r="2" />
+              <path d="M21 19l-5-7-4 5-3-4-4 6" />
+            </svg>
+            <span>Como Imagen (.png)</span>
+          </button>
+
+          <button class="sp-action" (click)="exportSql()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <ellipse cx="12" cy="7" rx="8" ry="3" />
+              <path d="M4 7v10c0 1.66 3.58 3 8 3s8-1.34 8-3V7" />
+              <path d="M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3" />
+            </svg>
+            <span>Código SQL</span>
+          </button>
+
+          <button class="sp-action" (click)="onGenerateFrontend()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <path d="M16 3v5H8V3" />
+              <rect x="8" y="15" width="8" height="4" rx="1" />
+            </svg>
+            <span>Flutter UI</span>
+          </button>
+
+          <button class="sp-action" (click)="exportJson()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="12" y1="18" x2="12" y2="12"></line>
+              <line x1="9" y1="15" x2="15" y2="15"></line>
+            </svg>
+            <span>Postman JSON</span>
+          </button>
+
+          <button class="sp-action" (click)="exportSwagger()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+              </path>
+            </svg>
+            <span>Swagger YAML</span>
+          </button>
+
+          <button class="sp-action" (click)="exportEnterpriseArchitect()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="16 18 22 12 16 6"></polyline>
+              <polyline points="8 6 2 12 8 18"></polyline>
+            </svg>
+            <span>A Enterprise Architect (XML)</span>
+          </button>
+        </div>
       }
     </div>
 
-    <!-- Botón Copiar Sala -->
+    <!-- Copiar código de sala -->
     <div class="pt-2">
-      <button
-        class="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white rounded-xl py-3 font-bold shadow-[0_0_15px_rgba(249,115,22,0.3)] hover:shadow-[0_0_20px_rgba(249,115,22,0.5)] transition-all flex items-center justify-center gap-2 transform hover:scale-[1.02]"
-        (click)="copyRoomCode()">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
+      <button class="sp-cta" (click)="copyRoomCode()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+          class="size-5">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
         </svg>
         Copiar código de sala
       </button>
       @if (copied() == true) {
-      <small class="text-orange-400 mt-2 block text-center font-medium animate-fade-in-down">¡Copiado al portapapeles!</small>
+        <small class="sp-copied animate-fade-in-down">¡Copiado al portapapeles!</small>
       }
     </div>
 
-    <!-- Chatbot panel -->
-    <div class="bg-white/5 border border-white/10 rounded-xl shadow-xl p-4 space-y-3 mt-4 relative overflow-hidden group">
-      <div class="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-      <h4 class="font-bold text-gray-200 flex items-center gap-2 relative z-10">
+    <!-- Generar modelo con IA -->
+    <div class="sp-card">
+      <h4 class="sp-card-title">
         <span class="text-xl">🤖</span> Generar modelo
       </h4>
 
-      <div class="flex space-x-2 relative z-10">
-        <textarea [(ngModel)]="prompt"
-          class="w-full bg-black/40 border border-gray-700 rounded-lg p-3 text-sm text-gray-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none resize-none placeholder-gray-500"
-          placeholder="Describe tu modelo aquí..." rows="3"></textarea>
+      <div class="flex space-x-2">
+        <textarea [(ngModel)]="prompt" class="sp-textarea" placeholder="Describe tu modelo aquí..."
+          rows="3"></textarea>
 
-        <button (click)="toggleVoiceInput()"
-          class="flex-shrink-0 px-3 py-2 bg-gray-800 border border-gray-700 text-white rounded-lg flex items-center justify-center transition hover:bg-orange-600 hover:border-orange-500 shadow-md">
-          @if (recognizing()==true) {
-          <span class="animate-pulse text-red-500">⏹️</span>
-          }
-          @else {
-          <span>🎤</span>
+        <button (click)="toggleVoiceInput()" class="sp-mic" [class.is-recording]="recognizing()">
+          @if (recognizing() == true) {
+            <span class="animate-pulse">⏹️</span>
+          } @else {
+            <span>🎤</span>
           }
         </button>
       </div>
 
-      <button
-        class="w-full bg-white/10 border border-white/20 text-white rounded-lg py-2.5 font-bold hover:bg-orange-600 hover:border-orange-500 transition-all shadow-lg relative z-10"
-        (click)="onGenerate()">
-        Generar con IA
-      </button>
+      <button class="sp-soft" (click)="onGenerate()">Generar con IA</button>
     </div>
 
-    <!-- Panel de validaciones -->
-    <div class="bg-white/5 border border-white/10 rounded-xl shadow-xl p-4 mt-4 relative overflow-hidden">
-      <div class="flex justify-between items-center cursor-pointer relative z-10" (click)="toggleValidationPanel()">
-        <h4 class="font-bold text-gray-200 flex items-center gap-2">
+    <!-- Sugerencias / validación -->
+    <div class="sp-card">
+      <div class="flex justify-between items-center cursor-pointer" (click)="toggleValidationPanel()">
+        <h4 class="sp-card-title mb-0">
           <span class="text-xl">🔍</span> Sugerencias
         </h4>
-        <span class="text-orange-400">
+        <span class="text-accent">
           @if (validationCollapsed()) {
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
-            <line x1="12" y1="8" x2="12" y2="16" stroke="currentColor" stroke-width="2" />
-            <line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="2" />
-          </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+              <line x1="12" y1="8" x2="12" y2="16" stroke="currentColor" stroke-width="2" />
+              <line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="2" />
+            </svg>
           } @else {
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
-            <line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="2" />
-          </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+              <line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="2" />
+            </svg>
           }
         </span>
       </div>
 
-      <button class="mt-3 w-full bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-lg py-2 font-semibold hover:bg-orange-500 hover:text-white transition-all relative z-10 flex items-center justify-center gap-2"
-        (click)="analyzeNow()" [disabled]="analyzingModel()">
-        <svg xmlns="http://www.w3.org/2000/svg" class="inline-block" width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <button class="sp-analyze" (click)="analyzeNow()" [disabled]="analyzingModel()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="inline-block" width="18" height="18" viewBox="0 0 24 24"
+          fill="none">
           <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" />
           <line x1="16" y1="16" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
         </svg>
         @if (!analyzingModel()) {
-        <span>Analizar modelo</span>
+          <span>Analizar modelo</span>
         }
         @if (analyzingModel()) {
-        <span>Analizando...</span>
+          <span>Analizando...</span>
         }
       </button>
 
       @if (!validationCollapsed()) {
-      <div class="mt-4 text-sm text-gray-300 space-y-4 max-h-48 overflow-y-auto pr-2 relative z-10 custom-scrollbar">
-        @if (analyzingModel()) {
-        <p class="italic text-orange-400 flex items-center justify-center py-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="inline-block mr-2 animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.3" />
-            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
-          </svg>
-          Revisando modelo...
-        </p>
-        } @else if (!validationResult()) {
-        <p class="italic text-gray-500 text-center py-2">No hay validaciones aún.</p>
-        } @else {
-        <!-- Validas -->
-        <div class="bg-black/30 p-3 rounded-lg border border-green-500/20">
-          <h5 class="text-green-400 font-bold mb-2 flex items-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-            Relaciones válidas
-          </h5>
-          <ul class="space-y-2">
-            @for (v of validationResult().analysis.validas; track v) {
-            <li class="border-l-2 border-green-500 pl-2">
-              <strong class="text-gray-200 block">{{ v.relacion }}</strong>
-              <small class="text-gray-400">{{ v.razon }}</small>
-            </li>
-            }
-          </ul>
-        </div>
+        <div class="mt-4 text-sm text-fg-2 space-y-4 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+          @if (analyzingModel()) {
+            <p class="italic text-accent flex items-center justify-center py-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="inline-block mr-2 animate-spin" width="18" height="18"
+                viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.3" />
+                <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+              </svg>
+              Revisando modelo...
+            </p>
+          } @else if (!validationResult()) {
+            <p class="italic text-fg-3 text-center py-2">No hay validaciones aún.</p>
+          } @else {
+            <!-- Válidas -->
+            <div class="sp-result sp-result-ok">
+              <h5 class="sp-result-title text-good">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Relaciones válidas
+              </h5>
+              <ul class="space-y-2">
+                @for (v of validationResult().analysis.validas; track v) {
+                  <li class="sp-item sp-item-ok">
+                    <strong class="text-fg block">{{ v.relacion }}</strong>
+                    <small class="text-fg-2">{{ v.razon }}</small>
+                  </li>
+                }
+              </ul>
+            </div>
 
-        <!-- Errores -->
-        <div class="bg-black/30 p-3 rounded-lg border border-red-500/20">
-          <h5 class="text-red-400 font-bold mb-2 flex items-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-            Errores
-          </h5>
-          <ul class="space-y-3">
-            @for (e of validationResult().analysis.errores; track e) {
-            <li class="border-l-2 border-red-500 pl-2">
-              <strong class="text-gray-200 block">{{ e.relacion }}</strong>
-              <small class="text-gray-400 block mb-1">{{ e.problema }}</small>
-              <div class="bg-orange-500/10 border border-orange-500/20 p-2 rounded text-orange-300">
-                <em class="text-xs">💡 {{ e.sugerencia }}</em>
-              </div>
-            </li>
-            }
-          </ul>
+            <!-- Errores -->
+            <div class="sp-result sp-result-err">
+              <h5 class="sp-result-title text-danger">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Errores
+              </h5>
+              <ul class="space-y-3">
+                @for (e of validationResult().analysis.errores; track e) {
+                  <li class="sp-item sp-item-err">
+                    <strong class="text-fg block">{{ e.relacion }}</strong>
+                    <small class="text-fg-2 block mb-1">{{ e.problema }}</small>
+                    <div class="sp-tip">
+                      <em class="text-xs">💡 {{ e.sugerencia }}</em>
+                    </div>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
         </div>
-        }
-      </div>
       }
     </div>
   </div>
 
-  @if(isLoadingImage()||isLoadingChatbox()|| isLoadingGeneratefrontend()||isLoadingGenerateBackend()){
-  <app-spinner />
+  @if (isLoadingImage() || isLoadingChatbox() || isLoadingGeneratefrontend() || isLoadingGenerateBackend()) {
+    <app-spinner />
   }
 </div>
