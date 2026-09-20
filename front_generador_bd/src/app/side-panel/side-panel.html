@@ -99,6 +99,20 @@
         </span>
         <span class="palette-label">Dependencia</span>
       </div>
+
+      <div class="palette-item" cdkDrag [cdkDragData]="{ type: 'associationClass' }"
+        (cdkDragEnded)="onDragEnded($event)">
+        <span class="rel-icon">
+          <svg width="46" height="16" viewBox="0 0 46 16" fill="none">
+            <path d="M2 2.5 L44 2.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" />
+            <!-- Sin stroke-linecap: las tapas redondeadas suman media pluma en cada
+                 extremo de cada guion y taparían los espacios de una línea tan corta. -->
+            <path d="M23 2.5 L23 9.5" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2 2" />
+            <rect x="15.5" y="9.5" width="15" height="5.5" rx="1.2" stroke="currentColor" stroke-width="1.8" />
+          </svg>
+        </span>
+        <span class="palette-label">Clase de asociación</span>
+      </div>
     </div>
   }
 

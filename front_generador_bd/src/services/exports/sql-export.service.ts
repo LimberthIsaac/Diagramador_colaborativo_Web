@@ -26,8 +26,22 @@ export class SqlExportService {
     sql += `CREATE DATABASE ${dbName};\n`;
     sql += `USE ${dbName};\n\n`;
 
+    // ====== CLASES DE ASOCIACIÓN ======
+    // Una clase de asociación es la tabla intermedia de un muchos a muchos con
+    // atributos propios. Su relación apunta del conector N:M a la clase, así que
+    // acá se indexa por el id del conector para poder consultarla más abajo.
+    const assocClassByLink = new Map<string, string>();
+    for (const rel of umlJson.relationships || []) {
+      if (rel.type === 'associationClass') {
+        assocClassByLink.set(rel.sourceId, rel.targetId);
+      }
+    }
+    // Esas clases no se emiten como tabla suelta: salen como tabla de unión.
+    const assocClassIds = new Set(assocClassByLink.values());
+
     // ====== TABLAS ======
     for (const cls of umlJson.classes) {
+      if (assocClassIds.has(cls.id)) continue;
       // Verificar si la clase es hija en una relación de herencia
       const generalizationRel = umlJson.relationships.find((rel: any) => rel.type === 'generalization' && rel.sourceId === cls.id);
       sql += `CREATE TABLE ${cls.name} (\n`;
@@ -75,6 +89,10 @@ export class SqlExportService {
 
     // ====== RELACIONES ======
     for (const rel of umlJson.relationships) {
+      // La clase de asociación no es una clave foránea: solo dice qué clase lleva
+      // los atributos del N:M. Ya se consultó al armar el índice de arriba.
+      if (rel.type === 'associationClass') continue;
+
       const source = umlJson.classes.find((c: any) => c.id === rel.sourceId);
       const target = umlJson.classes.find((c: any) => c.id === rel.targetId);
       if (!source || !target) continue;
@@ -85,14 +103,36 @@ export class SqlExportService {
 
       // N:M → tabla intermedia
       if (multSource.includes('*') && multTarget.includes('*')) {
-        const joinTable = `${source.name}_${target.name}`;
-        sql += `CREATE TABLE ${joinTable} (\n`;
-        sql += `  ${source.name.toLowerCase()}_id UUID NOT NULL,\n`;
-        sql += `  ${target.name.toLowerCase()}_id UUID NOT NULL,\n`;
-        sql += `  PRIMARY KEY (${source.name.toLowerCase()}_id, ${target.name.toLowerCase()}_id),\n`;
-        sql += `  CONSTRAINT fk_${joinTable}_${source.name.toLowerCase()} FOREIGN KEY (${source.name.toLowerCase()}_id) REFERENCES ${source.name}(${this.getPrimaryKey(source)}) ON DELETE CASCADE ON UPDATE CASCADE,\n`;
-        sql += `  CONSTRAINT fk_${joinTable}_${target.name.toLowerCase()} FOREIGN KEY (${target.name.toLowerCase()}_id) REFERENCES ${target.name}(${this.getPrimaryKey(target)}) ON DELETE CASCADE ON UPDATE CASCADE\n`;
-        sql += `);\n\n`;
+        // Si el usuario colgó una clase de asociación de este conector, esa clase
+        // ES la tabla intermedia: aporta el nombre y sus atributos propios.
+        const joinClass = umlJson.classes.find(
+          (c: any) => c.id === assocClassByLink.get(rel.id)
+        );
+
+        const joinTable = joinClass ? joinClass.name : `${source.name}_${target.name}`;
+        const srcCol = `${source.name.toLowerCase()}_id`;
+        const trgCol = `${target.name.toLowerCase()}_id`;
+        const srcPk = this.getPrimaryKeyInfo(source, umlJson);
+        const trgPk = this.getPrimaryKeyInfo(target, umlJson);
+
+        const cols: string[] = [
+          `  ${srcCol} ${srcPk.type} NOT NULL`,
+          `  ${trgCol} ${trgPk.type} NOT NULL`
+        ];
+
+        // Atributos propios de la relación (fecha, nota, cantidad…).
+        for (const attr of joinClass?.attributes || []) {
+          // Un atributo que choque con una de las dos claves foráneas daría una
+          // columna duplicada y el CREATE TABLE fallaría.
+          if (attr.name === srcCol || attr.name === trgCol) continue;
+          cols.push(`  ${attr.name} ${this.typeMap[attr.type] || 'VARCHAR(255)'}`);
+        }
+
+        cols.push(`  PRIMARY KEY (${srcCol}, ${trgCol})`);
+        cols.push(`  CONSTRAINT fk_${joinTable}_${source.name.toLowerCase()} FOREIGN KEY (${srcCol}) REFERENCES ${source.name}(${srcPk.name}) ON DELETE CASCADE ON UPDATE CASCADE`);
+        cols.push(`  CONSTRAINT fk_${joinTable}_${target.name.toLowerCase()} FOREIGN KEY (${trgCol}) REFERENCES ${target.name}(${trgPk.name}) ON DELETE CASCADE ON UPDATE CASCADE`);
+
+        sql += `CREATE TABLE ${joinTable} (\n` + cols.join(',\n') + `\n);\n\n`;
         continue;
       }
 
@@ -144,9 +184,13 @@ export class SqlExportService {
             onDelete = 'SET NULL';
           }
         }
+        // El tipo de la columna tiene que ser el de la clave primaria que
+        // referencia. Antes era `UUID` fijo, así que una PK `INT` o
+        // `VARCHAR(255)` hacía fallar la constraint al crearla.
+        const refPk = this.getPrimaryKeyInfo(refTable, umlJson);
         sql += `ALTER TABLE ${fkTable.name}\n`;
-        sql += `  ADD COLUMN ${column} UUID${notNull},\n`;
-        sql += `  ADD CONSTRAINT ${fkName} FOREIGN KEY (${column}) REFERENCES ${refTable.name}(${this.getPrimaryKey(refTable)}) ON DELETE ${onDelete} ON UPDATE CASCADE;\n\n`;
+        sql += `  ADD COLUMN ${column} ${refPk.type}${notNull},\n`;
+        sql += `  ADD CONSTRAINT ${fkName} FOREIGN KEY (${column}) REFERENCES ${refTable.name}(${refPk.name}) ON DELETE ${onDelete} ON UPDATE CASCADE;\n\n`;
         continue;
       }
     }
@@ -154,13 +198,48 @@ export class SqlExportService {
     return sql.trim();
   }
 
-  private getPrimaryKey(cls: any): string {
-    if (!cls.attributes || cls.attributes.length === 0) return 'id';
+  /**
+   * Nombre y tipo SQL de la clave primaria de una clase, tal como la emite el
+   * recorrido de tablas de `exportToSql`. Las columnas que la referencian tienen
+   * que declararse con ese mismo tipo o la constraint no se puede crear.
+   *
+   * `umlJson` es opcional solo por compatibilidad con llamadas viejas; sin él no
+   * se puede resolver la clave heredada de una clase hija.
+   */
+  private getPrimaryKeyInfo(cls: any, umlJson?: any): { name: string; type: string } {
+    // Clase hija de una generalización: su PK es la del padre, con el mismo
+    // nombre y tipo. Así la emite el recorrido de tablas.
+    const parentRel = umlJson?.relationships?.find(
+      (rel: any) => rel.type === 'generalization' && rel.sourceId === cls?.id
+    );
+    if (parentRel) {
+      const parent = umlJson.classes.find((c: any) => c.id === parentRel.targetId);
+      if (parent?.attributes?.length) {
+        const parentFirst = parent.attributes[0];
+        return {
+          name: parentFirst.name,
+          type: this.typeMap[parentFirst.type] || 'VARCHAR(255)'
+        };
+      }
+      return { name: 'id', type: 'UUID' };
+    }
+
+    if (!cls?.attributes || cls.attributes.length === 0) {
+      return { name: 'id', type: 'UUID' };
+    }
 
     const firstAttr = cls.attributes[0];
     const sqlType = this.typeMap[firstAttr.type] || 'VARCHAR(255)';
 
-    return this.invalidPkTypes.has(sqlType) ? 'id' : firstAttr.name;
+    // Un tipo que no sirve como clave primaria hace que la tabla se emita con una
+    // columna `id UUID` sintética; hay que referenciar esa y no el atributo.
+    return this.invalidPkTypes.has(sqlType)
+      ? { name: 'id', type: 'UUID' }
+      : { name: firstAttr.name, type: sqlType };
+  }
+
+  private getPrimaryKey(cls: any, umlJson?: any): string {
+    return this.getPrimaryKeyInfo(cls, umlJson).name;
   }
 
   downloadSql(umlJson: any, fileName: string = 'diagram.sql'): void {

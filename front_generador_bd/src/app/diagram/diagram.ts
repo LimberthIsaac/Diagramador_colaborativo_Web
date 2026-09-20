@@ -231,7 +231,7 @@ export class Diagram implements AfterViewInit {
         }
       }
 
-      if (['association','generalization','aggregation','composition','dependency'].includes(type)) {
+      if (['association','generalization','aggregation','composition','dependency','associationClass'].includes(type)) {
         this.relationshipService.startLinkCreation(
           this.diagramService['paper'],
           this.paperContainer.nativeElement,

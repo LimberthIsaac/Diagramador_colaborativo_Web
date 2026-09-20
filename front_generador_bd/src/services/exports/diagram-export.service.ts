@@ -11,9 +11,17 @@ export interface UmlClassDTO {
 
 export interface UmlRelationshipDTO {
   id: string;
-  type: string;              // association | aggregation | generalization | etc.
+  /** association | aggregation | generalization | composition | dependency | associationClass */
+  type: string;
+  /**
+   * Id del extremo de origen. Para todos los tipos es una clase, **salvo**
+   * `associationClass`: ahí referencia a otra relación, la asociación N:M de la
+   * que cuelga la clase intermedia.
+   */
   sourceId: string;
+  /** Id de la clase de destino. */
   targetId: string;
+  /** Cardinalidades [origen, destino]. Una `associationClass` no las tiene. */
   labels?: string[];
   vertices?: { x: number; y: number }[];
 }
