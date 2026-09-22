@@ -39,6 +39,26 @@ export class DiagramService {
    */
   async initialize(paperElement: HTMLElement, roomId: string): Promise<void> {
     try {
+      // Cada sala empieza con la vista en su posición inicial.
+      //
+      // Este servicio es único para toda la aplicación y sobrevive al pasar de
+      // una sala a otra: el grafo y el papel se crean de nuevo unas líneas más
+      // abajo, pero el zoom, el desplazamiento y la selección son campos del
+      // servicio y conservan lo que quedó de la sala anterior. Sin esto, quien
+      // aleja el zoom para ver un diagrama grande entra a la sala siguiente
+      // mirándola de lejos, y las clases nuevas parecen diminutas aunque tengan
+      // el tamaño de siempre.
+      //
+      // Tiene que ir antes de crear el papel, porque más abajo se aplican estos
+      // mismos valores con `paper.scale()` y `paper.translate()`.
+      //
+      // `selectedCell` entra en el mismo lote porque apunta a una celda del
+      // grafo anterior, que ya no existe: dejarla haría que la primera pulsación
+      // de Suprimir intentara borrar algo inexistente.
+      this.currentScale = 1;
+      this.pan = { x: 0, y: 0 };
+      this.selectedCell = null;
+
       // Configura la clave de almacenamiento local
       this.storageKey = `diagram-${roomId}`;
       // Importamos JointJS
@@ -1801,6 +1821,34 @@ export class DiagramService {
     }
 
     //console.log('✅ Relación actualizada exitosamente');
+  }
+
+  /**
+   * Vuelca en el lienzo un diagrama que viene de afuera (hoy, un XMI de
+   * Enterprise Architect) y se lo transmite al resto de la sala.
+   *
+   * Se difunde el estado completo y no las operaciones una por una porque una
+   * importación no es una edición: son decenas de altas que llegarían sueltas y
+   * en cualquier orden, y una relación aplicada antes que su clase rompe la
+   * vista de JointJS.
+   *
+   * @param replace `true` pisa lo que había; `false` le suma lo importado.
+   */
+  importDiagram(json: UmlExportDTO, replace: boolean): void {
+    if (!this.graph) return;
+
+    if (replace) {
+      // Sin `{ collab: true }` cada celda borrada emitiría su propio `delete` a
+      // la sala y dispararía la validación por IA una vez por celda.
+      this.graph.clear({ collab: true });
+      this.selectedCell = null;
+    }
+
+    this.loadFromJson(json);
+    this.persist();
+
+    const snapshot = this.exportService.export(this.graph);
+    this.collab.broadcast({ t: 'full_state', payload: snapshot, replace });
   }
 
   // Exporta el estado actual del diagrama a JSON

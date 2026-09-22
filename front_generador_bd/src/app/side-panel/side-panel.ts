@@ -12,6 +12,7 @@ import { Spinner } from "../components/diagram/spinner/spinner";
 import { ChatbotService } from '../../services/IA/chatbot.service';
 import { BackendGeneratorService } from '../../services/exports/backend-generator.service';
 import { XmiExportService } from '../../services/exports/xmi-export.service';
+import { XmiImportService, XmiImportResult } from '../../services/imports/xmi-import.service';
 
 
 @Component({
@@ -50,6 +51,7 @@ export class SidePanel {
     private sqlExportService: SqlExportService,
     private umlImageService: UmlImageServiceTs,
     private xmiExportService: XmiExportService,
+    private xmiImportService: XmiImportService,
     @Inject(PLATFORM_ID) platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(platformId); // ✅ detecta si estamos en navegador
@@ -434,6 +436,59 @@ export class SidePanel {
         this.umlImageService.loading.set(false);
       }
     });
+  }
+
+  /* ===================== IMPORTACIÓN DE XMI (Enterprise Architect) ===================== */
+
+  /** Diagrama leído y a la espera de que el usuario decida si pisa o suma. */
+  pendingImport = signal<XmiImportResult | null>(null);
+  /** Resumen de lo que entró, con los avisos de lo que no se pudo representar. */
+  importReport = signal<{ classes: number; relationships: number; warnings: string[] } | null>(null);
+  importing = signal<boolean>(false);
+
+  async onImportXmi(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    // Se limpia el input para que elegir el mismo archivo dos veces seguidas
+    // vuelva a disparar el evento `change`.
+    input.value = '';
+    if (!file) return;
+
+    this.importing.set(true);
+    try {
+      const text = await this.xmiImportService.readFile(file);
+      const result = this.xmiImportService.parse(text);
+
+      // Si el lienzo está vacío no hay nada que pisar: se carga directo.
+      if (!this.diagramService.getGraph()?.getCells()?.length) {
+        this.applyImport(result, true);
+      } else {
+        this.pendingImport.set(result);
+      }
+    } catch (err: any) {
+      alert(`No se pudo importar el archivo:\n\n${err?.message ?? err}`);
+    } finally {
+      this.importing.set(false);
+    }
+  }
+
+  /** Confirma la importación pendiente. `replace` pisa; si no, suma. */
+  applyImport(result: XmiImportResult, replace: boolean) {
+    this.diagramService.importDiagram(result.diagram, replace);
+    this.pendingImport.set(null);
+    this.importReport.set({
+      classes: result.diagram.classes.length,
+      relationships: result.diagram.relationships.length,
+      warnings: result.warnings
+    });
+  }
+
+  cancelImport() {
+    this.pendingImport.set(null);
+  }
+
+  dismissImportReport() {
+    this.importReport.set(null);
   }
 
   onGenerateFrontend() {

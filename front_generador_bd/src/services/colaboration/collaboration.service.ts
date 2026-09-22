@@ -17,7 +17,10 @@ type Op =
   | { t: 'update_vertices'; id: string; vertices: any[] }
   | { t: 'delete'; id: string }
   | { t: 'request_full_state' }
-  | { t: 'full_state'; payload: any };
+  /** `replace` pisa el diagrama del receptor en vez de sumarle lo que llega.
+   *  Lo usa la importación de XMI; sin él, importar sobre una sala con trabajo
+   *  dejaba a cada quien con una mezcla distinta. */
+  | { t: 'full_state'; payload: any; replace?: boolean };
 
 @Injectable({ providedIn: 'root' })
 export class CollaborationService {
@@ -230,9 +233,15 @@ export class CollaborationService {
         }
 
         case 'full_state': {
-          if (this.api) {
-            this.api!.loadFromJson(op.payload);
+          if (!this.api) break;
+          if (op.replace) {
+            // `{ collab: true }` es imprescindible: sin él, cada celda borrada
+            // dispara el handler de `remove` del lienzo, que reemitiría un
+            // `delete` por celda a toda la sala y además llamaría a la
+            // validación por IA una vez por cada una.
+            graph.clear({ collab: true });
           }
+          this.api.loadFromJson(op.payload);
           break;
         }
 

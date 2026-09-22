@@ -149,9 +149,72 @@
             <span>Importar Imagen</span>
           </label>
           <input type="file" id="imagenImport" accept="image/*" class="hidden" (change)="onImportImage($event)" />
+
+          <label for="xmiImport" class="sp-action">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <path d="M14 2v6h6" />
+              <path d="M12 18v-6" />
+              <path d="m9 15 3 3 3-3" />
+            </svg>
+            <span>{{ importing() ? 'Leyendo archivo…' : 'Importar de Enterprise Architect' }}</span>
+          </label>
+          <input type="file" id="xmiImport" accept=".xml,.xmi" class="hidden" (change)="onImportXmi($event)" />
         </div>
       }
     </div>
+
+    <!-- Importación de XMI: elegir entre pisar el diagrama o sumarle lo importado -->
+    @if (pendingImport(); as imported) {
+      <div class="sp-modal-backdrop">
+        <div class="sp-modal">
+          <h3 class="sp-modal-title">Ya hay un diagrama en el lienzo</h3>
+          <p class="sp-modal-text">
+            El archivo trae {{ imported.diagram.classes.length }} clases y
+            {{ imported.diagram.relationships.length }} relaciones.
+            ¿Qué hacemos con lo que ya está?
+          </p>
+          <div class="sp-modal-actions">
+            <button class="sp-modal-btn sp-modal-btn--danger" (click)="applyImport(imported, true)">
+              Reemplazar
+            </button>
+            <button class="sp-modal-btn" (click)="applyImport(imported, false)">
+              Agregar
+            </button>
+            <button class="sp-modal-btn sp-modal-btn--ghost" (click)="cancelImport()">
+              Cancelar
+            </button>
+          </div>
+          <p class="sp-modal-note">Reemplazar borra el diagrama actual para todos los de la sala.</p>
+        </div>
+      </div>
+    }
+
+    <!-- Resultado de la importación, con lo que no se pudo representar -->
+    @if (importReport(); as report) {
+      <div class="sp-modal-backdrop">
+        <div class="sp-modal">
+          <h3 class="sp-modal-title">Diagrama importado</h3>
+          <p class="sp-modal-text">
+            Entraron {{ report.classes }} clases y {{ report.relationships }} relaciones.
+          </p>
+          @if (report.warnings.length) {
+            <p class="sp-modal-text sp-modal-text--warn">
+              {{ report.warnings.length }} cosas necesitan tu atención:
+            </p>
+            <ul class="sp-modal-list">
+              @for (w of report.warnings; track w) {
+                <li>{{ w }}</li>
+              }
+            </ul>
+          }
+          <div class="sp-modal-actions">
+            <button class="sp-modal-btn" (click)="dismissImportReport()">Entendido</button>
+          </div>
+        </div>
+      </div>
+    }
 
     <!-- Exportaciones -->
     <div>

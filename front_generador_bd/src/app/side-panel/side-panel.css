@@ -307,3 +307,87 @@
   background: color-mix(in srgb, var(--accent) 10%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
 }
+
+/* ---------- Diálogos de la importación de XMI ---------- */
+
+.sp-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgb(0 0 0 / 0.5);
+}
+
+.sp-modal {
+  width: 100%;
+  max-width: 26rem;
+  padding: 1.5rem;
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  box-shadow: 0 20px 45px rgb(0 0 0 / 0.35);
+}
+
+.sp-modal-title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.sp-modal-text {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+  color: var(--fg-2);
+}
+
+.sp-modal-text--warn { color: var(--accent); font-weight: 600; }
+
+.sp-modal-list {
+  max-height: 11rem;
+  margin: 0 0 1rem;
+  padding-left: 1.1rem;
+  overflow-y: auto;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--fg-2);
+}
+
+.sp-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.sp-modal-btn {
+  flex: 1 1 auto;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--fg);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.sp-modal-btn:hover { border-color: var(--card-hover-border); }
+
+/* Reemplazar borra trabajo ajeno, así que se distingue del resto. */
+.sp-modal-btn--danger {
+  color: #fff;
+  background: linear-gradient(90deg, var(--btn-from), var(--btn-to));
+  border-color: transparent;
+}
+
+.sp-modal-btn--ghost { background: transparent; color: var(--fg-2); }
+
+.sp-modal-note {
+  margin: 0.75rem 0 0;
+  font-size: 0.75rem;
+  color: var(--fg-2);
+}
