@@ -33,6 +33,12 @@ public class PostmanCollectionGenerator {
 
         ArrayNode items = collection.putArray("item");
 
+        // ====== CLASES DE ASOCIACIÓN ======
+        // Mismo criterio que ProjectGenerator: la clase colgada de una relación N:M
+        // es la entidad intermedia, así que no lleva carpeta propia además.
+        java.util.Map<String, UmlClass> assocPorConector = AssociationClassUtil.porConector(schema);
+        java.util.Set<String> assocIds = AssociationClassUtil.ids(schema);
+
         // ====== DETECTAR ENTIDADES INTERMEDIAS PARA MANYTOMANY ======
         java.util.Set<String> intermediateEntities = new java.util.HashSet<>();
         if (schema.getRelationships() != null) {
@@ -69,19 +75,18 @@ public class PostmanCollectionGenerator {
                     if (sourceIsMany && targetIsMany) {
                         String sourceEntity = NamingUtil.toJavaClass(sourceName);
                         String targetEntity = NamingUtil.toJavaClass(targetName);
-                        
-                        // Ordenar alfabéticamente para consistencia
-                        String firstEntity = sourceEntity.compareTo(targetEntity) < 0 ? sourceEntity : targetEntity;
-                        String secondEntity = sourceEntity.compareTo(targetEntity) < 0 ? targetEntity : sourceEntity;
-                        
-                        String intermediateEntityName = firstEntity + secondEntity;
-                        intermediateEntities.add(intermediateEntityName);
+
+                        intermediateEntities.add(AssociationClassUtil.nombreIntermedia(
+                                sourceEntity, targetEntity, assocPorConector.get(rel.getId())));
                     }
                 }
             }
         }
 
         for (UmlClass c : schema.getClasses()) {
+            // La clase de asociación se documenta más abajo, como entidad intermedia.
+            if (assocIds.contains(c.getId())) continue;
+
             String entityName = NamingUtil.toJavaClass(c.getName());
             String pluralName = entityName.toLowerCase();
 
@@ -515,7 +520,12 @@ public class PostmanCollectionGenerator {
         // Buscamos en el schema las relaciones ManyToMany que generan esta entidad intermedia
         
         final String[] entityNames = {null, null}; // [0] = first, [1] = second
-        
+
+        // Si la entidad intermedia es una clase de asociación, hay que mandar además
+        // sus atributos propios (cantidad, descuento...) en el cuerpo del POST.
+        java.util.Map<String, UmlClass> assocPorConector = AssociationClassUtil.porConector(schema);
+        UmlClass asociacion = null;
+
         if (schema.getRelationships() != null) {
             for (var rel : schema.getRelationships()) {
                 if ("association".equals(rel.getType())
@@ -552,12 +562,15 @@ public class PostmanCollectionGenerator {
                         
                         String firstEntity = sourceEntity.compareTo(targetEntity) < 0 ? sourceEntity : targetEntity;
                         String secondEntity = sourceEntity.compareTo(targetEntity) < 0 ? targetEntity : sourceEntity;
-                        
-                        String candidateName = firstEntity + secondEntity;
-                        
+
+                        UmlClass colgada = assocPorConector.get(rel.getId());
+                        String candidateName = AssociationClassUtil.nombreIntermedia(
+                                sourceEntity, targetEntity, colgada);
+
                         if (candidateName.equals(intermediateEntityName)) {
                             entityNames[0] = firstEntity;
                             entityNames[1] = secondEntity;
+                            asociacion = colgada;
                             break;
                         }
                     }
@@ -592,6 +605,15 @@ public class PostmanCollectionGenerator {
             
             body.set(firstFieldName, generateSampleValue(firstPkType, firstFieldName));
             body.set(secondFieldName, generateSampleValue(secondPkType, secondFieldName));
+        }
+
+        // Atributos propios de la clase de asociación
+        if (asociacion != null && asociacion.getAttributes() != null) {
+            for (var attr : asociacion.getAttributes()) {
+                String fieldName = NamingUtil.toField(attr.getName());
+                if (fieldName.equals("id")) continue;
+                body.set(fieldName, generateSampleValue(TypeMapper.toJava(attr.getType()), fieldName));
+            }
         }
 
         try {

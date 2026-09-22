@@ -63,10 +63,16 @@ public class ProjectGenerator {
         // normalizar
         schema = JsonNormalizer.normalize(schema);
 
+        // ====== CLASES DE ASOCIACIÓN ======
+        // Si el usuario colgó una clase de una relación N:M, esa clase ES la entidad
+        // intermedia: no se inventa una y no se genera además la clase suelta.
+        Map<String, UmlClass> assocPorConector = AssociationClassUtil.porConector(schema);
+        Set<String> assocIds = AssociationClassUtil.ids(schema);
+
         // ====== DETECTAR RELACIONES MUCHOS A MUCHOS Y CREAR ENTIDADES INTERMEDIAS ======
         List<Map<String, Object>> intermediateEntities = new ArrayList<>();
         Set<String> processedManyToManyRelations = new HashSet<>();
-        
+
         if (schema.getRelationships() != null) {
             for (var rel : schema.getRelationships()) {
                 if ("association".equals(rel.getType())
@@ -116,9 +122,12 @@ public class ProjectGenerator {
                             String firstEntityField = NamingUtil.toField(firstEntity);
                             String secondEntityField = NamingUtil.toField(secondEntity);
                             
-                            // Nombre de la entidad intermedia
-                            String intermediateEntityName = firstEntity + secondEntity;
-                            
+                            // Nombre de la entidad intermedia: el que puso el usuario si
+                            // colgó una clase de asociación, o el inventado si no.
+                            UmlClass asociacion = assocPorConector.get(rel.getId());
+                            String intermediateEntityName =
+                                    AssociationClassUtil.nombreIntermedia(sourceEntity, targetEntity, asociacion);
+
                             // Crear contexto para la entidad intermedia
                             Map<String, Object> intermediateCtx = new HashMap<>();
                             intermediateCtx.put("basePackage", basePackage);
@@ -133,8 +142,34 @@ public class ProjectGenerator {
                                 "name", "id",
                                 "generated", true
                             ));
+
+                            // Atributos propios de la clase de asociación (cantidad,
+                            // descuento...). Se saltean los que chocarían con el id
+                            // sintético o con los dos campos de relación.
+                            if (asociacion != null && asociacion.getAttributes() != null) {
+                                Set<String> ocupados = new HashSet<>(
+                                        List.of("id", firstEntityField, secondEntityField));
+                                for (var attr : asociacion.getAttributes()) {
+                                    String nombre = NamingUtil.toField(attr.getName());
+                                    if (!ocupados.add(nombre)) continue;
+                                    intermediateAttrs.add(Map.of(
+                                        "isId", false,
+                                        "type", TypeMapper.toJava(attr.getType()),
+                                        "name", nombre
+                                    ));
+                                }
+                            }
                             intermediateCtx.put("attributes", intermediateAttrs);
-                            
+
+                            // Opción A: la clave primaria es el id propio, y el par de
+                            // foráneas queda protegido por una restricción única para
+                            // que no se cargue dos veces la misma combinación.
+                            intermediateCtx.put("hasTableConstraint", true);
+                            // Se arman acá las llaves del arreglo: en la plantilla, un
+                            // "{" pegado a "{{{" se vuelve ambiguo para Mustache.
+                            intermediateCtx.put("uniqueColumns",
+                                    "{\"" + firstEntityField + "_id\", \"" + secondEntityField + "_id\"}");
+
                             // Dos relaciones ManyToOne con configuración para evitar loops
                             List<Map<String, Object>> intermediateManyToOne = new ArrayList<>();
                             intermediateManyToOne.add(Map.of(
@@ -175,6 +210,11 @@ public class ProjectGenerator {
         }
 
         for (UmlClass c : schema.getClasses()) {
+            // Las clases de asociación ya se generaron como entidad intermedia de su
+            // relación N:M. Si además se generaran acá quedarían dos tablas para el
+            // mismo concepto, y esta tomaría su primer atributo como clave primaria.
+            if (assocIds.contains(c.getId())) continue;
+
             String entityName = NamingUtil.toJavaClass(c.getName());
 
             // ====== DETECTAR PADRE (herencia) ANTES ======
@@ -335,9 +375,8 @@ public class ProjectGenerator {
                                 }
                             } else if (sourceIsMany && targetIsMany) {
                                 // *..* => Crear OneToMany hacia entidad intermedia
-                                String firstEntity = sourceEntity.compareTo(targetEntity) < 0 ? sourceEntity : targetEntity;
-                                String secondEntity = sourceEntity.compareTo(targetEntity) < 0 ? targetEntity : sourceEntity;
-                                String intermediateEntityName = firstEntity + secondEntity;
+                                String intermediateEntityName = AssociationClassUtil.nombreIntermedia(
+                                        sourceEntity, targetEntity, assocPorConector.get(rel.getId()));
                                 String mappedByField = NamingUtil.toField(sourceEntity);
                                 
                                 oneToMany.add(Map.of(
@@ -372,9 +411,8 @@ public class ProjectGenerator {
                                 ));
                             } else if (targetIsMany && sourceIsMany) {
                                 // source *..* target => Target también tiene OneToMany hacia entidad intermedia
-                                String firstEntity = sourceEntity.compareTo(targetEntity) < 0 ? sourceEntity : targetEntity;
-                                String secondEntity = sourceEntity.compareTo(targetEntity) < 0 ? targetEntity : sourceEntity;
-                                String intermediateEntityName = firstEntity + secondEntity;
+                                String intermediateEntityName = AssociationClassUtil.nombreIntermedia(
+                                        sourceEntity, targetEntity, assocPorConector.get(rel.getId()));
                                 String mappedByField = NamingUtil.toField(targetEntity);
                                 
                                 oneToMany.add(Map.of(

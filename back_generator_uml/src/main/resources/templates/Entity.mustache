@@ -21,11 +21,16 @@ import com.fasterxml.jackson.annotation.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
+{{#hasPk}}
 @JsonIdentityInfo(
     generator = ObjectIdGenerators.PropertyGenerator.class,
-    property = "id",
+    property = "{{pkName}}",
     scope = {{EntityName}}.class
 )
+{{/hasPk}}
+{{#hasTableConstraint}}
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {{{uniqueColumns}}}))
+{{/hasTableConstraint}}
 {{#isParent}}
     @Inheritance(strategy = InheritanceType.JOINED)
 {{/isParent}}
